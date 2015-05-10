@@ -1,7 +1,7 @@
 'use strict';
 
 var defaultSettings = {
-  'appID'          : '',
+  'appID'          : '872845769448863',
   'permissions'    : '',
   'channelFile'    : 'bower_components/angular-facebook-utils/channel.html',
   'routingEnabled' : false,
