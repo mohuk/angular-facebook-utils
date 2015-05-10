@@ -2,7 +2,7 @@
     global["true"] = exports;
     "use strict";
     var defaultSettings = {
-        appID: "872845769448863",
+        appID: "872985136101593",
         permissions: "",
         channelFile: "bower_components/angular-facebook-utils/channel.html",
         routingEnabled: false,
