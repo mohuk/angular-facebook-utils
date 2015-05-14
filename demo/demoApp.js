@@ -4,7 +4,10 @@ angular.module('facebookUtilsDemo', ['facebookUtils', 'ngRoute'])
     'channelFile'    : 'channel.html',
     'appID'          : '872985136101593'
   })
-  .config(function($routeProvider) {
+  .config(function($routeProvider, $httpProvider) {
+
+    $httpProvider.defaults.useXDomain = true;
+
     $routeProvider.when('/', {
       templateUrl : 'demo/partials/main.html',
       controller  : angular.noop
@@ -21,15 +24,25 @@ angular.module('facebookUtilsDemo', ['facebookUtils', 'ngRoute'])
   .controller('RootCtrl', function($rootScope, $scope, facebookUser, hungAPI) {
     $rootScope.loggedInUser = {};
 
+    $scope.fireAway = function(){
+      hungAPI.login().then(function(response){
+        hungAPI.setAPIToken(response.data.accessToken);
+      });
+    };
+
+    $scope.fireUsers = function(){
+      hungAPI.getUsers().then(function(res){
+        alert(res);
+      });
+    };
+
     $rootScope.$on('fbLoginSuccess', function(name, response) {
       // facebookUser.then(function(user) {
       //   user.api('/me').then(function(response) {
       //     $rootScope.loggedInUser = response;
       //   });
       // });
-      hungAPI.login(response.authResponse).then(function(response){
-        alert(res);
-      });
+      hungAPI.setAuthInfo(response.authResponse);
     });
 
     $rootScope.$on('fbLogoutSuccess', function() {
@@ -40,16 +53,41 @@ angular.module('facebookUtilsDemo', ['facebookUtils', 'ngRoute'])
   })
   .factory('hungAPI', function($http){
 
+    var auth_info;
+    var api_token;
+
     return {
-      login: login
+      login: login,
+      setAuthInfo: setAuthInfo,
+      getUsers: getUsers,
+      setAPIToken:setAPIToken
     };
+
+    function setAPIToken(apiToken){
+      api_token = apiToken;
+    }
+
+    function setAuthInfo(authInfo){
+      auth_info = authInfo;
+    }
     
-    function login(credentials){
+    function login(){
       var payload = {
-        userId: credentials.userID,
-        accessToken: credentials.accessToken
+        userId: auth_info.userID,
+        accessToken: auth_info.accessToken || false
       };
 
-      return $http.post('http://localhost:3000/api/auth/fb', payload);
+      return $http.post('http://localhost:3000/api/auth', payload);
+    }
+
+    function getUsers(){
+      var config = {
+          method: 'GET', 
+          url: 'http://localhost:3000/api/users', 
+          headers: {
+            'x-auth': api_token
+          }
+      };
+      return $http(config);
     }
   });
